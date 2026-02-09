@@ -1,0 +1,68 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.venv/
+.venv-build/
+env/
+venv/
+ENV/
+
+# Build and Packaging
+build/
+dist/
+*.spec
+*.manifest
+*.exe
+!scripts/*.ps1
+
+# IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# Logs
+*.log
+output.log
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Audio Files (Test data - don't commit large audio files)
+*.mp3
+*.wav
+*.flac
+*.m4a
+*.ogg
+*.aac
+*.m4p
+*.wma
+*.aiff
+*.opus
+
+# External Binaries (download via scripts or releases)
+packaging/ffmpeg/linux/ffmpeg
+packaging/ffmpeg/windows/ffmpeg.exe
+packaging/ffmpeg/macos/ffmpeg
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# mypy
+.mypy_cache/

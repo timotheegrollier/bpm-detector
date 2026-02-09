@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>com.bpm.Detector</id>
+  <name>BPM Detector</name>
+  <summary>Detection locale du tempo audio</summary>
+  <description>
+    <p>Detecte le BPM d'un fichier audio avec une interface simple.</p>
+  </description>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <launchable type="desktop-id">com.bpm.Detector.desktop</launchable>
+  <categories>
+    <category>AudioVideo</category>
+    <category>Audio</category>
+  </categories>
+</component>
