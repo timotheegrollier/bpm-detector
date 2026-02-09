@@ -13,7 +13,9 @@ ENV/
 # Build and Packaging
 build/
 dist/
+# PyInstaller generated spec files (but keep our main one)
 *.spec
+!bpm-detector.spec
 *.manifest
 *.exe
 !scripts/*.ps1
