@@ -71,12 +71,46 @@ if [ "$USE_OPTIMIZED" = true ]; then
   fi
 fi
 
+# Download UPX if optimized mode is on
+UPX_ARGS=""
+if [ "$USE_OPTIMIZED" = true ]; then
+  UPX_DIR="$ROOT/tools/upx-linux"
+  UPX_BIN="$UPX_DIR/upx"
+  
+  if [ ! -f "$UPX_BIN" ]; then
+    echo "Downloading UPX for Linux..."
+    mkdir -p "$UPX_DIR"
+    curl -L "https://github.com/upx/upx/releases/download/v4.2.2/upx-4.2.2-amd64_linux.tar.xz" -o upx.tar.xz
+    tar xf upx.tar.xz
+    mv upx-*-amd64_linux/upx "$UPX_BIN"
+    rm -rf upx.tar.xz upx-*-amd64_linux
+    chmod +x "$UPX_BIN"
+    echo "UPX installed."
+  fi
+  
+  if [ -f "$UPX_BIN" ]; then
+    UPX_ARGS="--upx-dir=$UPX_DIR"
+    echo "Using UPX compression."
+  fi
+fi
+
 echo "Building with: $SPEC_FILE"
 
-# Use the cross-platform spec file and force output to the project root dist/
+# Build
 pyinstaller --noconfirm --clean \
   --distpath "$ROOT/dist" \
   --workpath "$ROOT/build" \
+  $UPX_ARGS \
   "$SPEC_FILE"
 
-echo "OK -> $ROOT/dist/BPM-Detector-Pro"
+# Post-processing optimization
+OUTPUT_BIN="$ROOT/dist/BPM-Detector-Pro"
+if [ -f "$OUTPUT_BIN" ] && [ "$USE_OPTIMIZED" = true ]; then
+  echo "Stripping binary symbols..."
+  strip -s "$OUTPUT_BIN" || true
+  
+  SIZE=$(du -h "$OUTPUT_BIN" | cut -f1)
+  echo "Final Binary Size: $SIZE"
+fi
+
+echo "OK -> $OUTPUT_BIN"
