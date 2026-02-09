@@ -110,41 +110,82 @@ jobs:
             dist/*.rpm
 
   # ============================================
-  # FLATPAK BUILD
+  # FLATPAK BUILD (uses pre-built binary)
   # ============================================
   build-flatpak:
+    needs: build-linux
     runs-on: ubuntu-22.04
-    container:
-      image: bilelmoussaoui/flatpak-github-actions:gnome-45
-      options: --privileged
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        run: |
-          python3 -m pip install --upgrade pip
-          pip3 install -r requirements.txt pyinstaller
+      - name: Download Linux binary
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-builds
+          path: artifacts
 
-      - name: Download FFmpeg
+      - name: Prepare binary for Flatpak
         run: |
-          mkdir -p packaging/ffmpeg/linux
-          curl -L https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz -o ffmpeg.tar.xz
-          tar xf ffmpeg.tar.xz
-          mv ffmpeg-*-amd64-static/ffmpeg packaging/ffmpeg/linux/ffmpeg
-          chmod +x packaging/ffmpeg/linux/ffmpeg
-
-      - name: Build with PyInstaller first
-        run: |
-          pyinstaller --noconfirm --clean bpm-detector.spec
           mkdir -p flatpak-build
-          cp dist/${{ env.APP_NAME }} flatpak-build/
+          cp artifacts/${{ env.APP_NAME }} flatpak-build/
+          chmod +x flatpak-build/${{ env.APP_NAME }}
+
+      - name: Install Flatpak tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install -y flathub org.freedesktop.Platform//23.08 org.freedesktop.Sdk//23.08
+
+      - name: Create simplified Flatpak manifest
+        run: |
+          cat > flatpak-manifest.yml << 'EOF'
+          app-id: com.bpm.Detector
+          runtime: org.freedesktop.Platform
+          runtime-version: '23.08'
+          sdk: org.freedesktop.Sdk
+          command: bpm-detector-pro
+          finish-args:
+            - --socket=wayland
+            - --socket=x11
+            - --socket=fallback-x11
+            - --share=ipc
+            - --filesystem=home:ro
+            - --filesystem=xdg-music:ro
+            - --device=dri
+          modules:
+            - name: bpm-detector-pro
+              buildsystem: simple
+              build-commands:
+                - install -Dm755 BPM-Detector-Pro /app/bin/bpm-detector-pro
+                - install -Dm644 bpm-detector-pro.desktop /app/share/applications/com.bpm.Detector.desktop
+                - install -Dm644 bpm-detector.svg /app/share/icons/hicolor/scalable/apps/com.bpm.Detector.svg
+              sources:
+                - type: file
+                  path: flatpak-build/BPM-Detector-Pro
+                - type: file
+                  path: packaging/assets/bpm-detector.svg
+                - type: file
+                  path: flatpak-desktop.desktop
+                  dest-filename: bpm-detector-pro.desktop
+          EOF
+          
+          # Create desktop file
+          cat > flatpak-desktop.desktop << 'EOF'
+          [Desktop Entry]
+          Type=Application
+          Name=BPM Detector Pro
+          Comment=High-precision BPM detection for audio files
+          Exec=bpm-detector-pro
+          Icon=com.bpm.Detector
+          Categories=Audio;AudioVideo;Music;
+          Terminal=false
+          EOF
 
       - name: Build Flatpak
-        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
-        with:
-          bundle: ${{ env.APP_NAME }}.flatpak
-          manifest-path: packaging/flatpak/${{ env.APP_ID }}.yml
-          cache-key: flatpak-builder-${{ github.sha }}
+        run: |
+          flatpak-builder --force-clean --repo=repo build-dir flatpak-manifest.yml
+          flatpak build-bundle repo ${{ env.APP_NAME }}.flatpak ${{ env.APP_ID }}
 
       - name: Upload Flatpak artifact
         uses: actions/upload-artifact@v4
@@ -251,8 +292,8 @@ jobs:
   # CREATE GITHUB RELEASE
   # ============================================
   release:
-    needs: [build-linux, build-windows, build-macos]
-    # Note: Flatpak build is optional, don't block release if it fails
+    needs: [build-linux, build-flatpak, build-windows, build-macos]
+    # Continue even if optional builds fail
     if: always() && needs.build-linux.result == 'success' && needs.build-windows.result == 'success'
     runs-on: ubuntu-latest
     permissions:
