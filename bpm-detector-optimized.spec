@@ -8,7 +8,15 @@ import sys
 import sysconfig
 import glob
 import subprocess
-from PyInstaller.utils.hooks import collect_data_files, collect_dynamic_libs, get_python_library_path
+from PyInstaller.utils.hooks import collect_data_files, collect_dynamic_libs
+try:
+    from PyInstaller.utils.hooks import get_python_library_path  # PyInstaller >= 6.3
+except Exception:
+    try:
+        from PyInstaller.compat import get_python_library_path  # Older versions
+    except Exception:
+        def get_python_library_path():
+            return None
 
 block_cipher = None
 
