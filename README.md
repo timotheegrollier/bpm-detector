@@ -2,7 +2,7 @@
 
 **Détecteur de BPM haute précision** — Analyse le tempo de n'importe quel fichier audio avec une précision exceptionnelle.
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-1.1.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-lightgrey)
 
@@ -155,13 +155,21 @@ Le moteur de détection utilise :
 
 Ces paramètres sont optimisés pour la musique électronique (House, Techno, D&B) mais fonctionnent excellemment sur tous les genres.
 
-## 📋 Changelog v1.0.0
+## 📋 Changelog
 
-### Fonctionnalités
+### v1.1.1 (Hotfix) 🚑
+- 🐛 **Correctif Windows** : Correction du bug critique "python3.dll introuvable" sur certains systèmes
+- 🔧 **Build** : Amélioration du packaging autonome pour Windows (win_private_assemblies=True)
+
+### v1.1.0 ⚡
+- 🚀 **Performance** : Démarrage < 2s avec "Fast Startup"
+- 📉 **Taille** : Binaire réduit de 150 Mo à ~50 Mo
+- 🧠 **Optimisation** : Lazy loading des modules et exclusions agressives
+
+### v1.0.0 (Initial) 🎉
 - ✅ Détection BPM avec algorithme hybride ACF/Beats
 - ✅ Interface graphique Qt avec thème sombre
 - ✅ Interface CLI complète avec options avancées
-- ✅ Interface web Flask
 - ✅ Support de tous les formats audio courants (via FFmpeg)
 - ✅ Analyse de segments avec visualisation
 - ✅ Snapping intelligent vers BPM entiers

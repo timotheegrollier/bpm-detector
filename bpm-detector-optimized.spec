@@ -121,6 +121,13 @@ hiddenimports = [
     'scipy.ndimage',
 ]
 
+# Check for python3.dll explicitly
+python_dir = os.path.dirname(sys.executable)
+python3_dll = os.path.join(python_dir, 'python3.dll')
+if os.path.exists(python3_dll):
+    print(f"Found python3.dll at {python3_dll}, adding to binaries...")
+    binaries.append((python3_dll, '.'))
+
 a = Analysis(
     ['bpm_gui_fast.py'],  # Use optimized GUI
     pathex=[],
@@ -132,7 +139,7 @@ a = Analysis(
     runtime_hooks=[],
     excludes=EXCLUDES,
     win_no_prefer_redirects=False,
-    win_private_assemblies=False,
+    win_private_assemblies=True,
     cipher=block_cipher,
     noarchive=False,
 )
