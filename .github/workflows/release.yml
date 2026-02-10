@@ -223,13 +223,19 @@ jobs:
         run: |
           .\scripts\build_windows.ps1
 
+      - name: Package Windows build (zip for onedir)
+        run: |
+          if (Test-Path "dist/${{ env.APP_NAME }}/${{ env.APP_NAME }}.exe") {
+            Compress-Archive -Path "dist/${{ env.APP_NAME }}/*" -DestinationPath "dist/${{ env.APP_NAME }}-Windows-x64.zip" -Force
+          }
+
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
           path: |
             dist/${{ env.APP_NAME }}.exe
-            dist/${{ env.APP_NAME }}/${{ env.APP_NAME }}.exe
+            dist/${{ env.APP_NAME }}-Windows-x64.zip
           if-no-files-found: error
 
   # ============================================
@@ -321,10 +327,10 @@ jobs:
           cp artifacts/linux-builds/*.rpm release/ || true
           
           # Windows
-          if [ -f "artifacts/windows-build/${{ env.APP_NAME }}.exe" ]; then
-            cp "artifacts/windows-build/${{ env.APP_NAME }}.exe" "release/${{ env.APP_NAME }}-Windows-x64.exe"
+          if [ -f "artifacts/windows-build/${{ env.APP_NAME }}-Windows-x64.zip" ]; then
+            cp "artifacts/windows-build/${{ env.APP_NAME }}-Windows-x64.zip" "release/${{ env.APP_NAME }}-Windows-x64.zip"
           else
-            cp "artifacts/windows-build/${{ env.APP_NAME }}/${{ env.APP_NAME }}.exe" "release/${{ env.APP_NAME }}-Windows-x64.exe"
+            cp "artifacts/windows-build/${{ env.APP_NAME }}.exe" "release/${{ env.APP_NAME }}-Windows-x64.exe"
           fi
           
           # macOS
@@ -358,7 +364,7 @@ jobs:
             | 🐧 **Linux** | DEB | `bpm-detector-pro_*.deb` | `sudo apt install ./fichier.deb` |
             | 🐧 **Linux** | RPM | `bpm-detector-pro-*.rpm` | `sudo dnf install ./fichier.rpm` |
             | 🐧 **Linux** | Flatpak | `BPM-Detector-Pro.flatpak` | `flatpak install ./fichier.flatpak` |
-            | 🪟 **Windows** | EXE | `BPM-Detector-Pro-Windows-x64.exe` | Double-cliquez |
+            | 🪟 **Windows** | ZIP | `BPM-Detector-Pro-Windows-x64.zip` | Dézippez puis lancez l'exe |
             | 🍎 **macOS** | DMG | `BPM-Detector-Pro-macOS.dmg` | Ouvrez et glissez dans Applications |
             
             ---
