@@ -20,6 +20,7 @@ import tkinter.font as tkfont
 from tkinter import filedialog, ttk
 from typing import Optional
 
+from app_version import APP_VERSION
 # Lazy-loaded modules (heavy)
 _librosa = None
 _np = None
@@ -44,7 +45,7 @@ def _ensure_libs():
 
 def _lightweight_bpm_detect(file_path: str, options: dict) -> dict:
     """
-    Lightweight BPM detection using only numpy/scipy + soundfile.
+    Lightweight BPM detection using only numpy + soundfile.
     Falls back to librosa if available for better accuracy.
     """
     _ensure_libs()
@@ -92,7 +93,7 @@ def _lightweight_bpm_detect(file_path: str, options: dict) -> dict:
         if _librosa is not None:
             bpm = _estimate_bpm_librosa(y, sr, options)
         else:
-            bpm = _estimate_bpm_scipy(y, sr, options)
+            bpm = _estimate_bpm_numpy(y, sr, options)
         
         # Snap to integer if close
         snap = options.get("snap_bpm", True)
@@ -174,10 +175,9 @@ def _estimate_bpm_librosa(y, sr: int, options: dict) -> float:
     return bpm
 
 
-def _estimate_bpm_scipy(y, sr: int, options: dict) -> float:
-    """Fallback BPM detection using only scipy (no librosa)."""
-    from scipy import signal
-    from scipy.fft import rfft, rfftfreq
+def _estimate_bpm_numpy(y, sr: int, options: dict) -> float:
+    """Fallback BPM detection using only numpy (no librosa)."""
+    from numpy.fft import rfft
     
     min_bpm = options.get("min_bpm", 60)
     max_bpm = options.get("max_bpm", 200)
@@ -261,7 +261,7 @@ class BPMApp(tk.Tk):
     
     def __init__(self) -> None:
         super().__init__()
-        self.title("BPM Detector Pro")
+        self.title(f"BPM Detector Pro v{APP_VERSION}")
         self.geometry("1024x768")
         
         # Maximize window
@@ -375,6 +375,8 @@ class BPMApp(tk.Tk):
         ttk.Label(title_box, text="BPM Detector", style="Header.TLabel").pack(anchor="w")
         tk.Label(title_box, text="Studio Grade Analysis", bg=self.colors["bg"], 
                 fg=self.colors["accent"], font=(self._pick_font_family(), 9, "bold")).pack(anchor="w")
+        tk.Label(title_box, text=f"Version {APP_VERSION}", bg=self.colors["bg"],
+                fg=self.colors["muted"], font=(self._pick_font_family(), 8, "normal")).pack(anchor="w")
         
         self.gear_btn = tk.Button(
             header, text="⚙", command=self._open_settings,

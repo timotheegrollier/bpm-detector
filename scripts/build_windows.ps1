@@ -16,6 +16,15 @@ if ($UseOptimized) {
   Write-Host "Mode: Legacy (full librosa)" -ForegroundColor Yellow
 }
 
+$UseOnedirRaw = $env:USE_ONEDIR
+if (-not $UseOnedirRaw) { $UseOnedirRaw = "1" }
+$UseOnedir = $UseOnedirRaw.ToLower() -in @("1", "true", "yes", "y")
+if ($UseOnedir) {
+  Write-Host "Layout: ONEDIR (reduces Defender false positives)" -ForegroundColor Green
+} else {
+  Write-Host "Layout: ONEFILE" -ForegroundColor Yellow
+}
+
 if (-not (Test-Path $Venv)) {
   Write-Host "Creating virtual environment..."
   & $Python -m venv $Venv
@@ -23,6 +32,14 @@ if (-not (Test-Path $Venv)) {
 
 $PyExe = Join-Path $Venv "Scripts\python.exe"
 $PyInstaller = Join-Path $Venv "Scripts\pyinstaller.exe"
+
+Write-Host "Sync version from git tag..."
+$UpdateScript = Join-Path $Root "scripts\\update_version.py"
+if (Test-Path $UpdateScript) {
+  & $PyExe $UpdateScript
+} else {
+  Write-Warning "update_version.py not found; using existing app_version.py"
+}
 
 Write-Host "Installing dependencies..."
 & $PyExe -m pip install --upgrade pip --quiet
@@ -53,23 +70,30 @@ if (-not $Ffmpeg) {
 
 Write-Host "FFmpeg found: $Ffmpeg"
 
-# Try to download and setup UPX for better compression
+# UPX is optional (can increase Windows Defender false positives)
+$UseUpx = $env:USE_UPX -eq "1"
 $UpxDir = Join-Path $Root "tools\upx"
 $UpxExe = Join-Path $UpxDir "upx.exe"
-if (-not (Test-Path $UpxExe)) {
-  Write-Host "Downloading UPX for better compression..."
-  try {
-    $UpxUrl = "https://github.com/upx/upx/releases/download/v4.2.2/upx-4.2.2-win64.zip"
-    $UpxZip = Join-Path $env:TEMP "upx.zip"
-    Invoke-WebRequest -Uri $UpxUrl -OutFile $UpxZip -UseBasicParsing
-    New-Item -ItemType Directory -Path $UpxDir -Force | Out-Null
-    Expand-Archive -Path $UpxZip -DestinationPath $env:TEMP -Force
-    Copy-Item (Join-Path $env:TEMP "upx-4.2.2-win64\upx.exe") $UpxDir
-    Remove-Item $UpxZip -Force
-    Write-Host "UPX installed successfully" -ForegroundColor Green
-  } catch {
-    Write-Host "UPX download failed, continuing without compression..." -ForegroundColor Yellow
+
+if ($UseUpx) {
+  if (-not (Test-Path $UpxExe)) {
+    Write-Host "Downloading UPX for better compression..."
+    try {
+      $UpxUrl = "https://github.com/upx/upx/releases/download/v4.2.2/upx-4.2.2-win64.zip"
+      $UpxZip = Join-Path $env:TEMP "upx.zip"
+      Invoke-WebRequest -Uri $UpxUrl -OutFile $UpxZip -UseBasicParsing
+      New-Item -ItemType Directory -Path $UpxDir -Force | Out-Null
+      Expand-Archive -Path $UpxZip -DestinationPath $env:TEMP -Force
+      Copy-Item (Join-Path $env:TEMP "upx-4.2.2-win64\upx.exe") $UpxDir
+      Remove-Item $UpxZip -Force
+      Write-Host "UPX installed successfully" -ForegroundColor Green
+    } catch {
+      Write-Host "UPX download failed, continuing without compression..." -ForegroundColor Yellow
+      $UseUpx = $false
+    }
   }
+} else {
+  Write-Host "UPX disabled (set USE_UPX=1 to enable compression)" -ForegroundColor Yellow
 }
 
 # Select spec file
@@ -85,17 +109,26 @@ if ($UseOptimized) {
 
 Write-Host "Building with: $SpecFile"
 
-# Build with UPX if available
+# Build with UPX if available and enabled
 $UpxArgs = @()
-if (Test-Path $UpxExe) {
+if ($UseUpx -and (Test-Path $UpxExe)) {
   $UpxArgs = @("--upx-dir", $UpxDir)
   Write-Host "Using UPX compression from: $UpxDir" -ForegroundColor Green
 }
 
 & $PyInstaller --noconfirm --clean @UpxArgs $SpecFile
 
-$OutputExe = Join-Path $Root "dist\BPM-Detector-Pro.exe"
-if (Test-Path $OutputExe) {
+$OutputExeOnefile = Join-Path $Root "dist\BPM-Detector-Pro.exe"
+$OutputExeOnedir = Join-Path $Root "dist\BPM-Detector-Pro\BPM-Detector-Pro.exe"
+
+$OutputExe = $null
+if ($UseOnedir -and (Test-Path $OutputExeOnedir)) {
+  $OutputExe = $OutputExeOnedir
+} elseif (Test-Path $OutputExeOnefile) {
+  $OutputExe = $OutputExeOnefile
+}
+
+if ($OutputExe) {
   $Size = (Get-Item $OutputExe).Length / 1MB
   Write-Host ""
   Write-Host "=== BUILD SUCCESS ===" -ForegroundColor Green

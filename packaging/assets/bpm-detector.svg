@@ -9,8 +9,14 @@
       <stop offset="100%" stop-color="#0ea5e9"/>
     </linearGradient>
   </defs>
-  <rect x="16" y="16" width="224" height="224" rx="48" fill="url(#bg)" stroke="#1f2937" stroke-width="4"/>
-  <circle cx="128" cy="128" r="76" fill="none" stroke="url(#accent)" stroke-width="10"/>
-  <path d="M128 64 L128 128 L174 150" fill="none" stroke="#38bdf8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="128" y="190" text-anchor="middle" font-family="Segoe UI, Cantarell, sans-serif" font-size="28" fill="#e5e7eb" letter-spacing="2">BPM</text>
+  <rect x="16" y="16" width="224" height="224" rx="52" fill="url(#bg)" stroke="#1f2937" stroke-width="4"/>
+  <circle cx="128" cy="128" r="72" fill="none" stroke="url(#accent)" stroke-width="10"/>
+  <g fill="#38bdf8">
+    <rect x="64" y="108" width="16" height="40" rx="8"/>
+    <rect x="92" y="92" width="16" height="72" rx="8"/>
+    <rect x="120" y="80" width="16" height="96" rx="8"/>
+    <rect x="148" y="92" width="16" height="72" rx="8"/>
+    <rect x="176" y="108" width="16" height="40" rx="8"/>
+  </g>
+  <circle cx="128" cy="128" r="6" fill="#22d3ee"/>
 </svg>

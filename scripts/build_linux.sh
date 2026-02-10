@@ -11,6 +11,8 @@ fi
 
 # shellcheck source=/dev/null
 source "$VENV/bin/activate"
+echo "Sync version from git tag..."
+python "$ROOT/scripts/update_version.py" || echo "WARNING: update_version.py failed, using existing version"
 python -m pip install --upgrade pip
 # Default to optimized build unless USE_LEGACY_BUILD is set
 USE_OPTIMIZED=true

@@ -15,6 +15,7 @@ from tkinter import filedialog, ttk
 from typing import Optional, Callable
 
 from bpm_detector import detect_bpm_details
+from app_version import APP_VERSION
 
 def analysis_worker(file_path: str, options: dict) -> dict:
     """Top-level worker for ProcessPoolExecutor to avoid GUI crashes."""
@@ -77,7 +78,7 @@ class SettingsDialog(tk.Toplevel):
 class BPMApp(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
-        self.title("BPM Detector Pro")
+        self.title(f"BPM Detector Pro v{APP_VERSION}")
         self.geometry("1024x768") # Default fallback
         # "Fullscreen modified" = Maximized (still has taskbar/titlebar)
         if sys.platform.startswith("linux"):
@@ -150,6 +151,8 @@ class BPMApp(tk.Tk):
         title_box.pack(side="left")
         ttk.Label(title_box, text="BPM Detector", style="Header.TLabel").pack(anchor="w")
         tk.Label(title_box, text="Studio Grade Analysis", bg=self.colors["bg"], fg=self.colors["accent"], font=(self._pick_font_family(), 9, "bold")).pack(anchor="w")
+        tk.Label(title_box, text=f"Version {APP_VERSION}", bg=self.colors["bg"],
+                fg=self.colors["muted"], font=(self._pick_font_family(), 8, "normal")).pack(anchor="w")
 
         self.gear_btn = tk.Button(
             header, text="⚙", command=self._open_settings,

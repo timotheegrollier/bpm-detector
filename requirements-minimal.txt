@@ -1,8 +1,7 @@
 # Minimal requirements for optimized build
-# Full librosa is optional - falls back to scipy-only detection
+# Full librosa is optional - falls back to numpy-only detection
 numpy>=1.26
 soundfile>=0.12.1
-scipy>=1.12
 
 # Optional: Full librosa for better accuracy (adds ~50MB to bundle)
 # Uncomment for full features:
