@@ -17,6 +17,7 @@ import sys
 import threading
 import tkinter as tk
 import tkinter.font as tkfont
+import traceback
 from tkinter import filedialog, ttk
 from typing import Optional
 
@@ -285,6 +286,8 @@ class BPMApp(tk.Tk):
         self._queue = queue.Queue()
         self._active_tasks = 0
         self._libs_loaded = False
+        self._libs_failed = False
+        self._libs_error = ""
         
         self._init_theme()
         self._build_ui()
@@ -299,7 +302,7 @@ class BPMApp(tk.Tk):
                 _ensure_libs()
                 self._queue.put(("libs_loaded", None))
             except Exception as e:
-                self._queue.put(("libs_error", str(e)))
+                self._queue.put(("libs_error", traceback.format_exc()))
         
         threading.Thread(target=loader, daemon=True).start()
         self._check_libs_loading()
@@ -310,9 +313,23 @@ class BPMApp(tk.Tk):
             msg = self._queue.get_nowait()
             if msg[0] == "libs_loaded":
                 self._libs_loaded = True
+                self._libs_failed = False
+                self._libs_error = ""
                 self._set_status("Système prêt.")
+                self._log("Librairies chargées.", error=False)
             elif msg[0] == "libs_error":
-                self._set_status(f"Erreur init: {msg[1]}", error=True)
+                err = msg[1] or ""
+                summary = self._summarize_error(err)
+                if "numpy" in err.lower() or "numpy" in summary.lower():
+                    summary = f"{summary} (problème d'installation de numpy)"
+                self._libs_loaded = False
+                self._libs_failed = True
+                self._libs_error = summary
+                self._set_status(f"Erreur init: {summary}", error=True)
+                self._log(f"Erreur init: {summary}", error=True)
+                details = err.strip()
+                if details and details != summary:
+                    self._log(details, error=True)
         except queue.Empty:
             self._set_status("Chargement des librairies...")
             self.after(100, self._check_libs_loading)
@@ -466,6 +483,41 @@ class BPMApp(tk.Tk):
         self.tracks_tree.configure(yscrollcommand=sb.set)
         self.tracks_tree.pack(side="left", fill="both", expand=True)
         sb.pack(side="right", fill="y")
+
+        # Logs (copyable)
+        logs = ttk.Frame(self, style="Panel.TFrame")
+        logs.pack(fill="x", padx=30, pady=(0, 10))
+
+        logs_header = ttk.Frame(logs, style="Panel.TFrame")
+        logs_header.pack(fill="x", padx=12, pady=(10, 4))
+        ttk.Label(logs_header, text="LOGS",
+                  font=(self._pick_font_family(), 9, "bold")).pack(side="left")
+        tk.Button(
+            logs_header, text="Copier", command=self._copy_logs,
+            bg=self.colors["panel"], fg=self.colors["text"], bd=0,
+            padx=10, pady=4, cursor="hand2"
+        ).pack(side="right")
+
+        logs_body = tk.Frame(logs, bg=self.colors["panel"])
+        logs_body.pack(fill="both", padx=12, pady=(0, 12))
+
+        self.log_text = tk.Text(
+            logs_body,
+            height=6,
+            wrap="word",
+            bg=self.colors["panel"],
+            fg=self.colors["text"],
+            insertbackground=self.colors["text"],
+            font=self.font_mono,
+            bd=0
+        )
+        self.log_text.configure(state="disabled")
+        self.log_text.tag_configure("error", foreground=self.colors["danger"])
+        self.log_text.tag_configure("info", foreground=self.colors["text"])
+        log_sb = ttk.Scrollbar(logs_body, orient="vertical", command=self.log_text.yview)
+        self.log_text.configure(yscrollcommand=log_sb.set)
+        self.log_text.pack(side="left", fill="both", expand=True)
+        log_sb.pack(side="right", fill="y")
         
         # Status bar
         self.status_var = tk.StringVar(value="Initialisation...")
@@ -513,6 +565,11 @@ class BPMApp(tk.Tk):
         if self._active_tasks > 0:
             return
         
+        if self._libs_failed:
+            self._set_status(f"Erreur init: {self._libs_error}", error=True)
+            self._log(f"Erreur init: {self._libs_error}", error=True)
+            return
+
         if not self._libs_loaded:
             self._set_status("Librairies en cours de chargement...", error=True)
             return
@@ -590,6 +647,7 @@ class BPMApp(tk.Tk):
                 elif mtype == "err":
                     self.tracks_tree.item(path, 
                                          values=(os.path.basename(path), "ERR", "Échec"))
+                    self._log(f"{os.path.basename(path)}: {msg[2]}", error=True)
                     self._update_progress(msg[3])
                     
         except queue.Empty:
@@ -608,6 +666,28 @@ class BPMApp(tk.Tk):
         self.status_label.configure(
             fg=self.colors["danger"] if error else self.colors["muted"]
         )
+
+    def _summarize_error(self, err: str) -> str:
+        lines = [line.strip() for line in err.strip().splitlines() if line.strip()]
+        return lines[-1] if lines else "Erreur inconnue"
+
+    def _log(self, msg: str, error: bool = False) -> None:
+        if not msg:
+            return
+        tag = "error" if error else "info"
+        self.log_text.configure(state="normal")
+        for line in msg.rstrip().splitlines():
+            self.log_text.insert("end", line + "\n", tag)
+        self.log_text.configure(state="disabled")
+        self.log_text.see("end")
+
+    def _copy_logs(self) -> None:
+        text = self.log_text.get("1.0", "end-1c")
+        if not text.strip():
+            return
+        self.clipboard_clear()
+        self.clipboard_append(text)
+        self._set_status("Logs copiés.")
 
 
 class SettingsDialog(tk.Toplevel):

@@ -2,7 +2,7 @@
 
 **Détecteur de BPM haute précision** — Analyse le tempo de n'importe quel fichier audio avec une précision exceptionnelle.
 
-![Version](https://img.shields.io/badge/version-1.2.1-blue)
+![Version](https://img.shields.io/badge/version-1.2.3-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-lightgrey)
 
@@ -159,6 +159,10 @@ Le moteur de détection utilise :
 Ces paramètres sont optimisés pour la musique électronique (House, Techno, D&B) mais fonctionnent excellemment sur tous les genres.
 
 ## 📋 Changelog
+
+### v1.2.3 (Release) ✅
+- 📋 **Logs copiables** dans l'application
+- 🧯 **Erreurs d'init claires** (numpy C-extensions) en rouge + détails
 
 ### v1.2.1 (Release) ✅
 - 🎵 **BPM Detector Pro v1.2.1**

@@ -8,13 +8,13 @@ import queue
 import sys
 import threading
 import multiprocessing
+import traceback
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import filedialog, ttk
 from typing import Optional, Callable
 
-from bpm_detector import detect_bpm_details
 from app_version import APP_VERSION
 
 def analysis_worker(file_path: str, options: dict) -> dict:
@@ -22,11 +22,12 @@ def analysis_worker(file_path: str, options: dict) -> dict:
     # We can't use the GUI-linked callback here across processes easily,
     # so we'll return the final result. Progress is handled by task completion.
     try:
+        from bpm_detector import detect_bpm_details
         # We wrap the detector to return a clean dict
         res = detect_bpm_details(file_path, **{k:v for k,v in options.items() if k != 'path'})
         return {"status": "ok", "file": file_path, "bpm": res["bpm"]}
     except Exception as e:
-        return {"status": "err", "file": file_path, "error": str(e)}
+        return {"status": "err", "file": file_path, "error": traceback.format_exc()}
 
 class SettingsDialog(tk.Toplevel):
     def __init__(self, parent: BPMApp) -> None:
@@ -227,6 +228,41 @@ class BPMApp(tk.Tk):
         self.tracks_tree.pack(side="left", fill="both", expand=True)
         sb.pack(side="right", fill="y")
 
+        # Logs (copyable)
+        logs = ttk.Frame(self, style="Panel.TFrame")
+        logs.pack(fill="x", padx=30, pady=(0, 10))
+
+        logs_header = ttk.Frame(logs, style="Panel.TFrame")
+        logs_header.pack(fill="x", padx=12, pady=(10, 4))
+        ttk.Label(logs_header, text="LOGS",
+                  font=(self._pick_font_family(), 9, "bold")).pack(side="left")
+        tk.Button(
+            logs_header, text="Copier", command=self._copy_logs,
+            bg=self.colors["panel"], fg=self.colors["text"], bd=0,
+            padx=10, pady=4, cursor="hand2"
+        ).pack(side="right")
+
+        logs_body = tk.Frame(logs, bg=self.colors["panel"])
+        logs_body.pack(fill="both", padx=12, pady=(0, 12))
+
+        self.log_text = tk.Text(
+            logs_body,
+            height=6,
+            wrap="word",
+            bg=self.colors["panel"],
+            fg=self.colors["text"],
+            insertbackground=self.colors["text"],
+            font=self.font_mono,
+            bd=0
+        )
+        self.log_text.configure(state="disabled")
+        self.log_text.tag_configure("error", foreground=self.colors["danger"])
+        self.log_text.tag_configure("info", foreground=self.colors["text"])
+        log_sb = ttk.Scrollbar(logs_body, orient="vertical", command=self.log_text.yview)
+        self.log_text.configure(yscrollcommand=log_sb.set)
+        self.log_text.pack(side="left", fill="both", expand=True)
+        log_sb.pack(side="right", fill="y")
+
         # Footer
         self.status_var = tk.StringVar(value="Système prêt.")
         self.status_label = tk.Label(self, textvariable=self.status_var, bg=self.colors["bg"], fg=self.colors["muted"], font=(self._pick_font_family(), 9), anchor="w", padx=30, pady=10)
@@ -340,6 +376,14 @@ class BPMApp(tk.Tk):
                     self._update_progress(msg[3])
                 elif mtype == "err":
                     self.tracks_tree.item(path, values=(os.path.basename(path), "ERR", "Échec"))
+                    err = msg[2] or ""
+                    summary = self._summarize_error(err)
+                    if "numpy" in err.lower() or "numpy" in summary.lower():
+                        summary = f"{summary} (problème d'installation de numpy)"
+                    self._log(f"{os.path.basename(path)}: {summary}", error=True)
+                    details = err.strip()
+                    if details and details != summary:
+                        self._log(details, error=True)
                     self._update_progress(msg[3])
         except queue.Empty:
             if self._active_tasks > 0: self.after(100, self._poll_queue)
@@ -354,6 +398,28 @@ class BPMApp(tk.Tk):
     def _set_status(self, msg: str, error=False) -> None:
         self.status_var.set(msg)
         self.status_label.configure(fg=self.colors["danger"] if error else self.colors["muted"])
+
+    def _summarize_error(self, err: str) -> str:
+        lines = [line.strip() for line in err.strip().splitlines() if line.strip()]
+        return lines[-1] if lines else "Erreur inconnue"
+
+    def _log(self, msg: str, error: bool = False) -> None:
+        if not msg:
+            return
+        tag = "error" if error else "info"
+        self.log_text.configure(state="normal")
+        for line in msg.rstrip().splitlines():
+            self.log_text.insert("end", line + "\n", tag)
+        self.log_text.configure(state="disabled")
+        self.log_text.see("end")
+
+    def _copy_logs(self) -> None:
+        text = self.log_text.get("1.0", "end-1c")
+        if not text.strip():
+            return
+        self.clipboard_clear()
+        self.clipboard_append(text)
+        self._set_status("Logs copiés.")
 
 
 if __name__ == "__main__":
