@@ -139,7 +139,6 @@ EXCLUDES = [
     'http',
     'urllib3',
     'requests',
-    'email',
     'html',
     'xml',
     
