@@ -78,8 +78,10 @@ if os_name == 'windows':
     else:
         print(f"WARNING: Version info not found at {version_candidate}")
 
-# Use onefile by default on Windows for simpler distribution
-use_onedir = False
+# Default to onedir on Windows for better antivirus compatibility
+# Onefile mode causes "Failed to load Python DLL" on many Windows systems
+# because Defender blocks DLL extraction to %TEMP%\_MEI*
+use_onedir = (os_name == 'windows')  # default: onedir on Windows, onefile elsewhere
 env_use_onedir = os.environ.get('USE_ONEDIR')
 if env_use_onedir is not None:
     use_onedir = env_use_onedir.strip().lower() in ('1', 'true', 'yes', 'y')
