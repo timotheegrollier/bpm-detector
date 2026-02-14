@@ -2,7 +2,7 @@
 
 **Détecteur de BPM haute précision** — Analyse le tempo de n'importe quel fichier audio avec une précision exceptionnelle.
 
-![Version](https://img.shields.io/badge/version-1.1.3-blue)
+![Version](https://img.shields.io/badge/version-1.1.9-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-lightgrey)
 
@@ -27,7 +27,7 @@ Téléchargez le binaire directement depuis les [Releases GitHub](../../releases
 
 Aucune installation requise — c'est portable !
 
-> **Windows (important)** : le build est maintenant en mode `ONEFILE` par défaut (un seul `.exe` pour un démarrage direct). Si vous utilisez le mode `ONEDIR` (`USE_ONEDIR=1`), dézippez **tout** et lancez `BPM-Detector-Pro.exe` depuis ce dossier. Ne déplacez pas l'exe seul, sinon l'erreur `python3.dll introuvable` peut apparaître.  
+> **Windows (important)** : le build est maintenant en mode `ONEFILE` par défaut (un seul `.exe` pour un démarrage direct). Si vous utilisez le mode `ONEDIR` (`USE_ONEDIR=1`), dézippez **tout** et lancez `BPM-Detector-Pro.exe` depuis ce dossier. Ne déplacez pas l'exe seul, sinon l'erreur `python311.dll` / `python3.dll introuvable` peut apparaître. Si cela arrive même en `ONEFILE`, gardez les DLL Python fournies à côté de l'exe (archive portable) ou utilisez `ONEDIR`.  
 > **Note sécurité** : un exécutable non signé peut afficher un avertissement SmartScreen. Pour une distribution publique, signez l'exe (Authenticode). Voir BUILDING.md.
 
 ### Option 2 : Depuis les Sources
@@ -159,6 +159,12 @@ Le moteur de détection utilise :
 Ces paramètres sont optimisés pour la musique électronique (House, Techno, D&B) mais fonctionnent excellemment sur tous les genres.
 
 ## 📋 Changelog
+
+### v1.1.9 (Release) ✅
+- 🪟 **Windows** : correction durable de l'erreur `python311.dll` / `python3.dll introuvable`
+- 📦 **Portable** : ZIP Windows inclut désormais l'exe + DLLs Python (lancement sans installer Python)
+- 🧰 **Build** : détection renforcée des DLL Python + arrêt du build si DLL manquante
+- 🔧 **Build** : support des variables `PYTHON_DLL` / `PYTHON_DLL_DIR` pour forcer le chemin
 
 ### v1.1.3 (Hotfix) 🚑
 - 🐛 **Build Fix**: Suppression de l'option obsolète `win_private_assemblies` (PyInstaller 6+)

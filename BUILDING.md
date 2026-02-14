@@ -98,7 +98,7 @@ Téléchargez depuis https://ffmpeg.org/download.html et placez le binaire au bo
 - Antivirus qui scanne le .exe → Ajoutez une exception
 - Premier démarrage (cache) → Le 2ème lancement sera plus rapide
 
-### "python3.dll introuvable"
-- En ONEFILE (défaut), cela ne devrait plus arriver.
+### "python311.dll / python3.dll introuvable"
+- En ONEFILE (défaut), cela ne devrait plus arriver. Si cela arrive, utilisez l'archive portable (DLL Python a côté de l'exe) ou passez en ONEDIR.
 - En ONEDIR, assurez-vous d'avoir **dézippé tout le dossier** `BPM-Detector-Pro` et de lancer l'exe depuis ce dossier.
-- Le script de build copie automatiquement les DLL Python nécessaires à côté de l'exe.
+- Le script de build copie automatiquement les DLL Python nécessaires à côté de l'exe. Vous pouvez forcer leur chemin avec `PYTHON_DLL` ou `PYTHON_DLL_DIR`.

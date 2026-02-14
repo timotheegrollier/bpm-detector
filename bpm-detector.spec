@@ -100,19 +100,50 @@ def _add_python_dlls(binaries_list):
     version_str = f"{sys.version_info.major}{sys.version_info.minor}"
     dll_names = [f'python{version_str}.dll', 'python3.dll']
 
+    found_any = False
+    def _add(path, note=None):
+        nonlocal found_any
+        if path and os.path.exists(path):
+            if (path, '.') not in binaries_list:
+                if note:
+                    print(note)
+                binaries_list.append((path, '.'))
+            found_any = True
+            return True
+        return False
+
+    # Allow explicit override via environment variables
+    env_dll = os.environ.get('PYTHON_DLL')
+    if env_dll:
+        for raw in env_dll.split(os.pathsep):
+            cand = raw.strip().strip('"')
+            _add(cand, f"Using PYTHON_DLL: {cand}")
+
+    env_dir = os.environ.get('PYTHON_DLL_DIR')
+    if env_dir and os.path.isdir(env_dir):
+        for name in dll_names:
+            _add(os.path.join(env_dir, name), f"Found {name} via PYTHON_DLL_DIR: {env_dir}")
+
+    # sysconfig hint for DLL name/path
+    cfg_pydll = sysconfig.get_config_var('pythondll')
+    if cfg_pydll:
+        if os.path.isabs(cfg_pydll):
+            _add(cfg_pydll, f"Found python DLL via sysconfig: {cfg_pydll}")
+        else:
+            if cfg_pydll not in dll_names:
+                dll_names.append(cfg_pydll)
+
     # Best-effort: ask PyInstaller for the python DLL path first
     py_dll = get_python_library_path()
-    if py_dll and os.path.exists(py_dll):
-        print(f"Found python DLL via PyInstaller: {py_dll}")
-        binaries_list.append((py_dll, '.'))
+    _add(py_dll, f"Found python DLL via PyInstaller: {py_dll}" if py_dll else None)
 
     python_dir = os.path.dirname(sys.executable)
-    base_dir = sys.base_prefix
+    base_prefix = sys.base_prefix
     search_paths = [
         python_dir,
         os.path.abspath(os.path.join(python_dir, '..')),  # Common in venv
-        base_dir,
-        os.path.join(base_dir, 'DLLs'),
+        base_prefix,
+        os.path.join(base_prefix, 'DLLs'),
         sys.prefix,
         os.path.join(sys.prefix, 'DLLs'),
     ]
@@ -127,7 +158,6 @@ def _add_python_dlls(binaries_list):
     seen = set()
     search_paths = [p for p in search_paths if p and not (p in seen or seen.add(p))]
 
-    found_any = False
     for dll_name in dll_names:
         found = False
         for path in search_paths:
@@ -142,13 +172,17 @@ def _add_python_dlls(binaries_list):
             print(f"WARNING: Could not find {dll_name} in standard locations.")
 
     # Last resort: recursive search under base prefix
-    if not found_any and base_dir and os.path.exists(base_dir):
+    if not found_any and base_prefix and os.path.exists(base_prefix):
         for dll_name in dll_names:
-            matches = glob.glob(os.path.join(base_dir, '**', dll_name), recursive=True)
+            matches = glob.glob(os.path.join(base_prefix, '**', dll_name), recursive=True)
             if matches:
                 print(f"Found {dll_name} via recursive search at {matches[0]}, adding to binaries...")
                 binaries_list.append((matches[0], '.'))
+                found_any = True
                 break
+
+    if not found_any:
+        raise SystemExit("ERROR: Python DLL not found. Set PYTHON_DLL or PYTHON_DLL_DIR and rebuild.")
 
 _add_python_dlls(binaries)
 
