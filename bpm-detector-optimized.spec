@@ -84,6 +84,21 @@ env_use_onedir = os.environ.get('USE_ONEDIR')
 if env_use_onedir is not None:
     use_onedir = env_use_onedir.strip().lower() in ('1', 'true', 'yes', 'y')
 
+# Avoid UPX/strip on Linux (can break OpenBLAS/NumPy shared libs)
+use_upx = True
+use_strip = True
+if os_name == 'linux':
+    use_upx = False
+    use_strip = False
+
+UPX_EXCLUDE = [
+    'vcruntime140.dll',
+    'python*.dll',
+    'libffi*.dll',
+    'libscipy_openblas*.so*',
+    'libopenblas*.so*',
+]
+
 # Minimal data collection - only soundfile libs
 datas = []
 binaries += collect_dynamic_libs('soundfile')
@@ -296,9 +311,9 @@ if use_onedir:
         name='BPM-Detector-Pro',
         debug=False,
         bootloader_ignore_signals=False,
-        strip=True,  # Strip debug symbols
-        upx=True,
-        upx_exclude=['vcruntime140.dll', 'python*.dll', 'libffi*.dll'],  # Don't compress critical DLLs
+        strip=use_strip,  # Strip debug symbols
+        upx=use_upx,
+        upx_exclude=UPX_EXCLUDE,  # Don't compress critical libs
         runtime_tmpdir=None,
         console=False,
         disable_windowed_traceback=False,
@@ -314,9 +329,9 @@ if use_onedir:
         a.binaries,
         a.zipfiles,
         a.datas,
-        strip=True,
-        upx=True,
-        upx_exclude=['vcruntime140.dll', 'python*.dll', 'libffi*.dll'],
+        strip=use_strip,
+        upx=use_upx,
+        upx_exclude=UPX_EXCLUDE,
         name='BPM-Detector-Pro',
     )
 else:
@@ -330,9 +345,9 @@ else:
         name='BPM-Detector-Pro',
         debug=False,
         bootloader_ignore_signals=False,
-        strip=True,  # Strip debug symbols
-        upx=True,
-        upx_exclude=['vcruntime140.dll', 'python*.dll', 'libffi*.dll'],  # Don't compress critical DLLs
+        strip=use_strip,  # Strip debug symbols
+        upx=use_upx,
+        upx_exclude=UPX_EXCLUDE,  # Don't compress critical libs
         runtime_tmpdir=None,
         console=False,
         disable_windowed_traceback=False,
