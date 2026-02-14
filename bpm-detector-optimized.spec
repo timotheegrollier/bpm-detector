@@ -140,7 +140,6 @@ EXCLUDES = [
     'urllib3',
     'requests',
     'html',
-    'xml',
     
     # Flask (not needed for GUI)
     'flask',

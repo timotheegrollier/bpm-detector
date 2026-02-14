@@ -2,7 +2,7 @@
 
 **Détecteur de BPM haute précision** — Analyse le tempo de n'importe quel fichier audio avec une précision exceptionnelle.
 
-![Version](https://img.shields.io/badge/version-1.1.9-blue)
+![Version](https://img.shields.io/badge/version-1.2.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-lightgrey)
 
@@ -160,11 +160,12 @@ Ces paramètres sont optimisés pour la musique électronique (House, Techno, D&
 
 ## 📋 Changelog
 
-### v1.1.9 (Release) ✅
-- 🪟 **Windows** : correction durable de l'erreur `python311.dll` / `python3.dll introuvable`
-- 📦 **Portable** : ZIP Windows inclut désormais l'exe + DLLs Python (lancement sans installer Python)
-- 🧰 **Build** : détection renforcée des DLL Python + arrêt du build si DLL manquante
-- 🔧 **Build** : support des variables `PYTHON_DLL` / `PYTHON_DLL_DIR` pour forcer le chemin
+### v1.2.1 (Release) ✅
+- 🎵 **BPM Detector Pro v1.2.1**
+- 🚀 **NOUVELLE VERSION OPTIMISÉE**
+- ⚡ **Démarrage instantané** (< 2s)
+- 📦 **Taille réduite** (~50 Mo)
+- 🧠 **Performance accrue**
 
 ### v1.1.3 (Hotfix) 🚑
 - 🐛 **Build Fix**: Suppression de l'option obsolète `win_private_assemblies` (PyInstaller 6+)
