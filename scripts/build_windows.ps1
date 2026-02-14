@@ -118,8 +118,70 @@ if ($UseUpx -and (Test-Path $UpxExe)) {
 $OutputDir = Join-Path $Root "dist\BPM-Detector-Pro"
 $OutputExe = Join-Path $OutputDir "BPM-Detector-Pro.exe"
 $OutputZip = Join-Path $Root "dist\BPM-Detector-Pro-Windows-x64.zip"
+$InternalDir = Join-Path $OutputDir "_internal"
+
+# Collect required runtime DLL names from the build Python version.
+$PythonDllName = (& $PyExe -c "import sys; print(f'python{sys.version_info.major}{sys.version_info.minor}.dll')").Trim()
+$RequiredInternalDlls = @(
+  $PythonDllName
+  "vcruntime140.dll"
+  "vcruntime140_1.dll"
+  "msvcp140.dll"
+)
 
 if (Test-Path $OutputExe) {
+  if (-not (Test-Path $InternalDir)) {
+    Write-Error "Build invalid: missing internal directory $InternalDir"
+    exit 1
+  }
+
+  $MissingDlls = @()
+  foreach ($DllName in $RequiredInternalDlls) {
+    $DllPath = Join-Path $InternalDir $DllName
+    if (-not (Test-Path $DllPath)) {
+      $MissingDlls += $DllName
+    }
+  }
+
+  if ($MissingDlls.Count -gt 0) {
+    Write-Error ("Build invalid: missing required runtime DLL(s) in _internal: " + ($MissingDlls -join ", "))
+    exit 1
+  }
+
+  # Add a launcher that clears "downloaded from internet" flags before starting the app.
+  $LauncherPath = Join-Path $OutputDir "START-BPM-Detector-Pro.cmd"
+  @'
+@echo off
+setlocal
+cd /d "%~dp0"
+
+where powershell.exe >nul 2>nul
+if %ERRORLEVEL% EQU 0 (
+  powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -Path '.' -Recurse -File | Unblock-File -ErrorAction SilentlyContinue" >nul 2>nul
+)
+
+start "" "%~dp0BPM-Detector-Pro.exe"
+'@ | Set-Content -Path $LauncherPath -Encoding ascii
+
+  $ReadmePath = Join-Path $OutputDir "README-Windows.txt"
+  @'
+BPM Detector Pro - Windows x64
+==============================
+
+IMPORTANT:
+- This package is for Windows 11/10 x64 only.
+- Keep BPM-Detector-Pro.exe and the _internal folder together.
+- Do not move BPM-Detector-Pro.exe alone outside this folder.
+
+Recommended start:
+- Double-click START-BPM-Detector-Pro.cmd
+
+If you get "Failed to load Python DLL":
+1) Right-click the ZIP file > Properties > check "Unblock", then extract again.
+2) Extract to a short local path (example: C:\BPM-Detector-Pro\).
+3) Install/repair Microsoft Visual C++ Redistributable 2015-2022 (x64).
+'@ | Set-Content -Path $ReadmePath -Encoding ascii
+
   # Remove old ZIP if it exists
   if (Test-Path $OutputZip) { Remove-Item $OutputZip -Force }
   

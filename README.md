@@ -23,11 +23,13 @@
 
 Téléchargez le binaire directement depuis les [Releases GitHub](../../releases) :
 - **Linux** : `BPM-Detector-Pro` (exécutable directement)
-- **Windows** : `BPM-Detector-Pro.exe` (double-cliquez pour lancer)
+- **Windows** : `BPM-Detector-Pro-Windows-x64.zip` (décompressez puis lancez)
+- **macOS** : `BPM-Detector-Pro-macOS.dmg`
 
 Aucune installation requise — c'est portable !
 
-> **Windows (important)** : le build est maintenant en mode `ONEFILE` par défaut (un seul `.exe` pour un démarrage direct). Si vous utilisez le mode `ONEDIR` (`USE_ONEDIR=1`), dézippez **tout** et lancez `BPM-Detector-Pro.exe` depuis ce dossier. Ne déplacez pas l'exe seul, sinon l'erreur `python311.dll` / `python3.dll introuvable` peut apparaître. Si cela arrive même en `ONEFILE`, gardez les DLL Python fournies à côté de l'exe (archive portable) ou utilisez `ONEDIR`.  
+> **Compatibilité** : chaque binaire est spécifique à son OS. Le ZIP Windows ne fonctionne pas sur Linux/macOS.
+> **Windows (important)** : dézippez **tout** le dossier, puis lancez `START-BPM-Detector-Pro.cmd` (recommandé) ou `BPM-Detector-Pro.exe`. Ne déplacez pas l'exe seul sans `_internal`.  
 > **Note sécurité** : un exécutable non signé peut afficher un avertissement SmartScreen. Pour une distribution publique, signez l'exe (Authenticode). Voir BUILDING.md.
 
 ### Option 2 : Depuis les Sources
@@ -123,7 +125,7 @@ Ouvrez `http://127.0.0.1:5000` dans votre navigateur.
 ```powershell
 # Place FFmpeg dans packaging/ffmpeg/windows/ffmpeg.exe
 .\scripts\build_windows.ps1
-# Résultat : dist/BPM-Detector-Pro.exe
+# Résultat : dist/BPM-Detector-Pro\ + dist/BPM-Detector-Pro-Windows-x64.zip
 ```
 
 Consultez [BUILDING.md](BUILDING.md) pour plus de détails.

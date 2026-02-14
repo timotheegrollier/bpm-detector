@@ -84,12 +84,14 @@ env_use_onedir = os.environ.get('USE_ONEDIR')
 if env_use_onedir is not None:
     use_onedir = env_use_onedir.strip().lower() in ('1', 'true', 'yes', 'y')
 
-# Avoid UPX/strip on Linux (can break OpenBLAS/NumPy shared libs)
-use_upx = True
-use_strip = True
-if os_name == 'linux':
-    use_upx = False
-    use_strip = False
+# Favor startup reliability on Windows/Linux.
+use_upx = (os_name == 'macos')
+use_strip = (os_name == 'macos')
+
+# Allow explicit override in CI/local builds.
+env_use_upx = os.environ.get('USE_UPX')
+if env_use_upx is not None:
+    use_upx = env_use_upx.strip().lower() in ('1', 'true', 'yes', 'y')
 
 UPX_EXCLUDE = [
     'vcruntime140.dll',
@@ -199,7 +201,38 @@ def _add_python_dlls(binaries_list):
     if not found_any:
         raise SystemExit("ERROR: Python DLL not found. Set PYTHON_DLL or PYTHON_DLL_DIR and rebuild.")
 
+def _add_windows_runtime_dlls(binaries_list):
+    if sys.platform != 'win32':
+        return
+
+    runtime_dlls = ['vcruntime140.dll', 'vcruntime140_1.dll', 'msvcp140.dll']
+    search_paths = [
+        os.path.dirname(sys.executable),
+        sys.base_prefix,
+        os.path.join(sys.base_prefix, 'DLLs'),
+        sys.prefix,
+        os.path.join(sys.prefix, 'DLLs'),
+    ]
+
+    # De-duplicate paths, keep order
+    seen = set()
+    search_paths = [p for p in search_paths if p and not (p in seen or seen.add(p))]
+
+    for dll_name in runtime_dlls:
+        found = False
+        for path in search_paths:
+            dll_path = os.path.join(path, dll_name)
+            if os.path.exists(dll_path):
+                if (dll_path, '.') not in binaries_list:
+                    print(f"Adding Windows runtime DLL: {dll_path}")
+                    binaries_list.append((dll_path, '.'))
+                found = True
+                break
+        if not found:
+            print(f"WARNING: Could not find {dll_name}. Target system may require VC++ Redistributable.")
+
 _add_python_dlls(binaries)
+_add_windows_runtime_dlls(binaries)
 
 a = Analysis(
     ['bpm_gui.py'],
