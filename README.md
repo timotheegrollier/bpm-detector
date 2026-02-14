@@ -27,6 +27,9 @@ Téléchargez le binaire directement depuis les [Releases GitHub](../../releases
 
 Aucune installation requise — c'est portable !
 
+> **Windows (important)** : le build est maintenant en mode `ONEFILE` par défaut (un seul `.exe` pour un démarrage direct). Si vous utilisez le mode `ONEDIR` (`USE_ONEDIR=1`), dézippez **tout** et lancez `BPM-Detector-Pro.exe` depuis ce dossier. Ne déplacez pas l'exe seul, sinon l'erreur `python3.dll introuvable` peut apparaître.  
+> **Note sécurité** : un exécutable non signé peut afficher un avertissement SmartScreen. Pour une distribution publique, signez l'exe (Authenticode). Voir BUILDING.md.
+
 ### Option 2 : Depuis les Sources
 
 ```bash

@@ -78,8 +78,8 @@ if os_name == 'windows':
     else:
         print(f"WARNING: Version info not found at {version_candidate}")
 
-# Use onedir by default on Windows to reduce Defender false positives
-use_onedir = os_name == 'windows'
+# Use onefile by default on Windows for simpler distribution
+use_onedir = False
 env_use_onedir = os.environ.get('USE_ONEDIR')
 if env_use_onedir is not None:
     use_onedir = env_use_onedir.strip().lower() in ('1', 'true', 'yes', 'y')
