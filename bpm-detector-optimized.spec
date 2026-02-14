@@ -136,7 +136,6 @@ EXCLUDES = [
     'numpy.testing',
     
     # Network/web (we only use local files)
-    'http',
     'urllib3',
     'requests',
     'html',
