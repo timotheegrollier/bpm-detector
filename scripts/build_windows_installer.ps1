@@ -7,6 +7,19 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Resolve-AbsolutePath {
+  param(
+    [Parameter(Mandatory = $true)][string]$Path,
+    [Parameter(Mandatory = $true)][string]$BaseDir
+  )
+
+  if ([System.IO.Path]::IsPathRooted($Path)) {
+    return [System.IO.Path]::GetFullPath($Path)
+  }
+
+  return [System.IO.Path]::GetFullPath((Join-Path $BaseDir $Path))
+}
+
 function Resolve-Iscc {
   $Cmd = Get-Command iscc.exe -ErrorAction SilentlyContinue
   if ($Cmd) { return $Cmd.Source }
@@ -43,6 +56,8 @@ function Get-AppVersionFromFile {
 $Root = Split-Path -Parent $PSScriptRoot
 $IssFile = Join-Path $Root "packaging\windows\BPM-detector.iss"
 $OutputName = "BPM-detector-Setup-Windows-x64.exe"
+$InputDir = Resolve-AbsolutePath -Path $InputDir -BaseDir $Root
+$OutputDir = Resolve-AbsolutePath -Path $OutputDir -BaseDir $Root
 
 if (-not (Test-Path $InputDir)) {
   throw "Input directory not found: $InputDir"
