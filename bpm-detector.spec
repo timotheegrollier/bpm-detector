@@ -152,9 +152,6 @@ EXCLUDES = [
     
     # Other unused
     'curses',
-    'asyncio',
-    'concurrent.futures',
-    'multiprocessing.popen_spawn_win32' if os_name != 'windows' else 'multiprocessing.popen_fork',
 ]
 
 # Explicit hidden imports for lazy imports used by the GUI wrapper.
