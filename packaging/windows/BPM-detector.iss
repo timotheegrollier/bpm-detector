@@ -16,9 +16,8 @@
   #define OutputDir "..\..\dist"
 #endif
 
-#ifnexist "{#SourceDir}\{#MyAppExeName}"
-  #error Installer source not found. Build Windows ONEDIR first.
-#endif
+; Source existence is validated in scripts/build_windows_installer.ps1.
+; Keep ISPP checks minimal to avoid false negatives with absolute CI paths.
 
 [Setup]
 AppId={#MyAppId}

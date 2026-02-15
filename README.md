@@ -2,7 +2,7 @@
 
 High-precision BPM detection for audio files with a modern desktop GUI, CLI, and web UI.
 
-![Version](https://img.shields.io/badge/version-1.3.5-blue)
+![Version](https://img.shields.io/badge/version-1.3.6-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows%20%7C%20macOS-lightgrey)
 
@@ -141,6 +141,11 @@ bpm-detector/
 ```
 
 ## Changelog
+
+### v1.3.6
+
+- Fixed Windows installer CI false-negative by removing fragile ISPP source precheck
+- Source folder validation remains enforced in `build_windows_installer.ps1`
 
 ### v1.3.5
 
