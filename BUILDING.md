@@ -126,6 +126,7 @@ The workflow now fails fast if:
 
 Windows CI now publishes both:
 
+- `BPM-detector-Linux-x64` (portable Linux binary)
 - `BPM-detector-Windows-x64.zip` (portable ONEDIR)
 - `BPM-detector-Setup-Windows-x64.exe` (installer)
 - `checksums.txt` (SHA256 hashes for all release files)
@@ -134,7 +135,7 @@ Windows CI now publishes both:
 Example:
 
 ```bash
-git tag v1.4.3
+git tag v1.5.0
 git push origin master --tags
 ```
 

@@ -425,8 +425,6 @@ jobs:
           # Linux
           cp artifacts/linux-builds/${{ env.APP_NAME }} release/${{ env.APP_NAME }}-Linux-x64
           chmod +x release/${{ env.APP_NAME }}-Linux-x64
-          tar -C release -cJf release/${{ env.APP_NAME }}-Linux-x64.tar.xz ${{ env.APP_NAME }}-Linux-x64
-          rm -f release/${{ env.APP_NAME }}-Linux-x64
           cp artifacts/linux-builds/*.deb release/ || true
           cp artifacts/linux-builds/*.rpm release/ || true
           
@@ -467,6 +465,7 @@ jobs:
             Multi-platform release for Linux, Windows, and macOS.
 
             ### Highlights
+            - Linux portable artifact is provided as a raw executable (`BPM-detector-Linux-x64`)
             - Windows: portable ZIP and installer are built from the same ONEDIR payload
             - Release integrity: `checksums.txt` now published with SHA256 hashes for every artifact
             - Source traceability: `build-info.txt` includes tag, commit SHA, app version, and GUI file checksum
@@ -475,7 +474,7 @@ jobs:
 
             | Platform | Format | File | Instructions |
             |----------|--------|------|--------------|
-            | Linux | Binary | `BPM-detector-Linux-x64.tar.xz` | Extract, then run `chmod +x BPM-detector-Linux-x64 && ./BPM-detector-Linux-x64` |
+            | Linux | Binary | `BPM-detector-Linux-x64` | Run `chmod +x` then execute |
             | Linux | DEB | `bpm-detector_*.deb` | `sudo apt install ./file.deb` |
             | Linux | RPM | `bpm-detector-*.rpm` | `sudo dnf install ./file.rpm` |
             | Linux | Flatpak | `BPM-detector.flatpak` | `flatpak install ./file.flatpak` |

@@ -2,7 +2,7 @@
 
 High-precision BPM detection for audio files with a modern desktop GUI and CLI.
 
-![Version](https://img.shields.io/badge/version-1.4.3-blue)
+![Version](https://img.shields.io/badge/version-1.5.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows%20%7C%20macOS-lightgrey)
 
@@ -22,7 +22,7 @@ High-precision BPM detection for audio files with a modern desktop GUI and CLI.
 
 Download artifacts from [GitHub Releases](../../releases):
 
-- Linux: `BPM-detector-Linux-x64.tar.xz`
+- Linux: `BPM-detector-Linux-x64`
 - Windows: `BPM-detector-Windows-x64.zip`
 - Windows Installer: `BPM-detector-Setup-Windows-x64.exe`
 - macOS: `BPM-detector-macOS.dmg`
@@ -150,6 +150,12 @@ bpm-detector/
 ```
 
 ## Changelog
+
+### v1.5.0
+
+- Restored Linux portable release artifact as a raw executable: `BPM-detector-Linux-x64`
+- Kept analysis/calibration/GUI behavior unchanged (no functional regression in the BPM engine path)
+- Maintained runtime-safe packaging policy (no dependency exclusions that break startup or analysis)
 
 ### v1.4.3
 
