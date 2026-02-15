@@ -1,11 +1,11 @@
-$ErrorActionPreference = "Stop"
-
 [CmdletBinding()]
 param(
   [string]$InputDir = (Join-Path (Split-Path -Parent $PSScriptRoot) "dist\BPM-detector"),
   [string]$OutputDir = (Join-Path (Split-Path -Parent $PSScriptRoot) "dist"),
   [string]$Version = ""
 )
+
+$ErrorActionPreference = "Stop"
 
 function Resolve-Iscc {
   $Cmd = Get-Command iscc.exe -ErrorAction SilentlyContinue
