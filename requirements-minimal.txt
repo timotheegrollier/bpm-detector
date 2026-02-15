@@ -1,8 +1,5 @@
-# Minimal requirements for optimized build
-# Full librosa is optional - falls back to numpy-only detection
+# Runtime requirements for release builds
+# GUI and CLI now share the same core BPM engine.
 numpy>=1.26
 soundfile>=0.12.1
-
-# Optional: Full librosa for better accuracy (adds ~50MB to bundle)
-# Uncomment for full features:
-# librosa>=0.10.2
+librosa>=0.10.2
