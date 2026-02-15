@@ -211,21 +211,6 @@ if (Test-Path $OutputExe) {
     Write-Warning ("Optional runtime DLL(s) not bundled: " + ($MissingOptionalDlls -join ", ") + ". System VC++ Redistributable may be required.")
   }
 
-  # Add a launcher that clears "downloaded from internet" flags before starting the app.
-  $LauncherPath = Join-Path $OutputDir "START-BPM-Detector-Pro.cmd"
-  @'
-@echo off
-setlocal
-cd /d "%~dp0"
-
-where powershell.exe >nul 2>nul
-if %ERRORLEVEL% EQU 0 (
-  powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -Path '.' -Recurse -File | Unblock-File -ErrorAction SilentlyContinue" >nul 2>nul
-)
-
-start "" "%~dp0BPM-Detector-Pro.exe"
-'@ | Set-Content -Path $LauncherPath -Encoding ascii
-
   $ReadmePath = Join-Path $OutputDir "README-Windows.txt"
   @'
 BPM Detector Pro - Windows x64
@@ -237,7 +222,7 @@ IMPORTANT:
 - Do not move BPM-Detector-Pro.exe alone outside this folder.
 
 Recommended start:
-- Double-click START-BPM-Detector-Pro.cmd
+- Double-click BPM-Detector-Pro.exe
 
 If you get "Failed to load Python DLL":
 1) Right-click the ZIP file > Properties > check "Unblock", then extract again.

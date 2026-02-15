@@ -228,17 +228,12 @@ jobs:
           $dirPath = "dist/${{ env.APP_NAME }}"
           $exePath = "$dirPath/${{ env.APP_NAME }}.exe"
           $internalDir = "$dirPath/_internal"
-          $launcherPath = "$dirPath/START-${{ env.APP_NAME }}.cmd"
           if (-not (Test-Path $exePath)) {
             Write-Error "Build failed: $exePath not found"
             exit 1
           }
           if (-not (Test-Path $internalDir)) {
             Write-Error "Build failed: $internalDir not found"
-            exit 1
-          }
-          if (-not (Test-Path $launcherPath)) {
-            Write-Error "Build failed: $launcherPath not found"
             exit 1
           }
           $pythonDll = Get-ChildItem -Path $internalDir -Filter "python*.dll" -File |
@@ -383,12 +378,12 @@ jobs:
           body: |
             ## BPM Detector Pro ${{ github.ref_name }}
 
-            This release focuses on desktop usability and packaging reliability.
+            This release focuses on Windows packaging cleanup and documentation alignment.
 
             ### Highlights
-            - Desktop GUI supports multi-file selection (`Fichiers...` with Ctrl/Cmd+click)
-            - Windows startup flow improved for packaged builds (`START-BPM-Detector-Pro.cmd`)
-            - Documentation updated in English
+            - Removed the Windows `.cmd` launcher from packaged artifacts
+            - Startup remains direct via `BPM-Detector-Pro.exe` with the same `_internal` layout
+            - Updated README/build/release instructions for the new Windows startup flow
 
             ### Downloads
 
@@ -398,7 +393,7 @@ jobs:
             | Linux | DEB | `bpm-detector-pro_*.deb` | `sudo apt install ./file.deb` |
             | Linux | RPM | `bpm-detector-pro-*.rpm` | `sudo dnf install ./file.rpm` |
             | Linux | Flatpak | `BPM-Detector-Pro.flatpak` | `flatpak install ./file.flatpak` |
-            | Windows | ZIP | `BPM-Detector-Pro-Windows-x64.zip` | Extract all files, then run `START-BPM-Detector-Pro.cmd` |
+            | Windows | ZIP | `BPM-Detector-Pro-Windows-x64.zip` | Extract all files, then run `BPM-Detector-Pro.exe` |
             | macOS | DMG | `BPM-Detector-Pro-macOS.dmg` | Open and drag to Applications |
 
             ### Package Manager Install

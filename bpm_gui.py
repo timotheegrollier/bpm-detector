@@ -80,6 +80,7 @@ class BPMApp(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.title(f"BPM Detector Pro v{APP_VERSION}")
+        self._set_window_icon()
         self.geometry("1024x768") # Default fallback
         # "Fullscreen modified" = Maximized (still has taskbar/titlebar)
         if sys.platform.startswith("linux"):
@@ -106,6 +107,43 @@ class BPMApp(tk.Tk):
 
         self._init_theme()
         self._build_ui()
+
+    def _resolve_asset_path(self, relative_path: str) -> Optional[str]:
+        candidates: list[str] = []
+        if getattr(sys, "frozen", False):
+            meipass = getattr(sys, "_MEIPASS", None)
+            if meipass:
+                candidates.append(os.path.join(meipass, relative_path))
+            candidates.append(os.path.join(os.path.dirname(sys.executable), relative_path))
+
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        candidates.append(os.path.join(base_dir, relative_path))
+
+        for candidate in candidates:
+            if os.path.isfile(candidate):
+                return candidate
+        return None
+
+    def _set_window_icon(self) -> None:
+        icon_rel_ico = os.path.join("packaging", "assets", "bpm-detector.ico")
+        icon_rel_png = os.path.join("packaging", "assets", "bpm-detector.png")
+
+        try:
+            if sys.platform.startswith("win"):
+                if getattr(sys, "frozen", False):
+                    self.iconbitmap(default=sys.executable)
+                    return
+                icon_ico = self._resolve_asset_path(icon_rel_ico)
+                if icon_ico:
+                    self.iconbitmap(default=icon_ico)
+                    return
+
+            icon_png = self._resolve_asset_path(icon_rel_png)
+            if icon_png:
+                self._app_icon_image = tk.PhotoImage(file=icon_png)
+                self.iconphoto(True, self._app_icon_image)
+        except Exception:
+            pass
 
     def _init_theme(self) -> None:
         self.colors = {

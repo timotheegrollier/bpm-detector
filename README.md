@@ -2,7 +2,7 @@
 
 High-precision BPM detection for audio files with a modern desktop GUI, CLI, and web UI.
 
-![Version](https://img.shields.io/badge/version-1.3.1-blue)
+![Version](https://img.shields.io/badge/version-1.3.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows%20%7C%20macOS-lightgrey)
 
@@ -30,7 +30,7 @@ Download artifacts from [GitHub Releases](../../releases):
 Windows note:
 
 - Extract the full ZIP folder before launching.
-- Start with `START-BPM-Detector-Pro.cmd` (recommended) or `BPM-Detector-Pro.exe`.
+- Start `BPM-Detector-Pro.exe` directly (no `.cmd` launcher required).
 - Do not move only the `.exe` without the `_internal` directory.
 
 ### Option 2: Run from Source
@@ -133,6 +133,13 @@ bpm-detector/
 ```
 
 ## Changelog
+
+### v1.3.2
+
+- Removed the Windows `.cmd` launcher from packaged artifacts
+- Keep direct startup via `BPM-Detector-Pro.exe` after full ZIP extraction
+- No functional changes to the Windows executable itself
+- Updated README/build docs/release notes for the new Windows flow
 
 ### v1.3.1
 

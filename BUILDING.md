@@ -21,8 +21,8 @@ Notes:
 
 - Windows build uses ONEDIR by default to reduce DLL startup/runtime issues.
 - A release ZIP is generated automatically.
-- The script syncs app version from the latest Git tag (example: `v1.3.1`).
-- You can override the version: `set APP_VERSION=1.3.1` before running the build.
+- The script syncs app version from the latest Git tag (example: `v1.3.2`).
+- You can override the version: `set APP_VERSION=1.3.2` before running the build.
 
 ### Linux (optimized)
 
@@ -103,7 +103,7 @@ pip install -r requirements.txt pyinstaller
 ### "python311.dll" or "python3.dll" missing
 
 - Extract the full ZIP folder.
-- Launch `START-BPM-Detector-Pro.cmd`.
+- Launch `BPM-Detector-Pro.exe` directly from the extracted folder.
 - If needed, install/repair `Microsoft Visual C++ Redistributable 2015-2022 (x64)`.
 
 ## Release CI
@@ -113,7 +113,7 @@ GitHub Actions release workflow runs on pushed tags matching `v*`.
 Example:
 
 ```bash
-git tag v1.3.1
+git tag v1.3.2
 git push origin master --tags
 ```
 
