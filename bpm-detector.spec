@@ -282,10 +282,8 @@ a = Analysis(
 seen = set()
 a.binaries = [x for x in a.binaries if not (x[0] in seen or seen.add(x[0]))]
 
-# Remove unnecessary datas
-a.datas = [x for x in a.datas if not any(
-    exc in x[0] for exc in ['__pycache__', '.pyc', 'test', 'example', 'doc']
-)]
+# Keep package datas intact. Some runtime files (e.g. librosa registry) are
+# required at execution time even if they look like "example" content.
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
