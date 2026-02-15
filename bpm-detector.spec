@@ -130,11 +130,6 @@ EXCLUDES = [
     'sphinx',
     'docutils',
     
-    # Unused numpy extras
-    'numpy.distutils',
-    'numpy.f2py',
-    'numpy.testing',
-    
     # Networking stacks (we only use local files)
     'urllib3',
     'requests',
