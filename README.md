@@ -2,7 +2,7 @@
 
 High-precision BPM detection for audio files with a modern desktop GUI and CLI.
 
-![Version](https://img.shields.io/badge/version-1.4.0-blue)
+![Version](https://img.shields.io/badge/version-1.4.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows%20%7C%20macOS-lightgrey)
 
@@ -27,6 +27,7 @@ Download artifacts from [GitHub Releases](../../releases):
 - Windows Installer: `BPM-detector-Setup-Windows-x64.exe`
 - macOS: `BPM-detector-macOS.dmg`
 - Checksums: `checksums.txt`
+- Build metadata: `build-info.txt`
 
 Windows note:
 
@@ -65,6 +66,8 @@ Get-FileHash .\BPM-detector-Setup-Windows-x64.exe -Algorithm SHA256
 ```
 
 Compare the resulting hash with the corresponding entry in `checksums.txt`.
+
+You can also inspect `build-info.txt` to confirm the release tag/commit and the `bpm_gui.py` checksum used for the build.
 
 ## Usage
 
@@ -147,6 +150,14 @@ bpm-detector/
 ```
 
 ## Changelog
+
+### v1.4.2
+
+- Fixed footer visibility and social link behavior in the desktop GUI
+- Hardened release CI to prevent stale GUI assets from being published:
+  - tag must point to default branch HEAD
+  - `app_version.py` must match the tag version
+- Added `build-info.txt` to release assets (tag, commit SHA, app version, GUI checksum)
 
 ### v1.4.0
 

@@ -119,16 +119,22 @@ sha256sum -c release/checksums.txt
 ## Release CI
 
 GitHub Actions release workflow runs on pushed tags matching `v*`.
+The workflow now fails fast if:
+
+- the pushed tag is not at the default branch HEAD
+- `app_version.py` does not match the tag version
+
 Windows CI now publishes both:
 
 - `BPM-detector-Windows-x64.zip` (portable ONEDIR)
 - `BPM-detector-Setup-Windows-x64.exe` (installer)
 - `checksums.txt` (SHA256 hashes for all release files)
+- `build-info.txt` (tag, commit SHA, app version, GUI checksum)
 
 Example:
 
 ```bash
-git tag v1.3.2
+git tag v1.4.2
 git push origin master --tags
 ```
 

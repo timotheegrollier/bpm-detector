@@ -11,12 +11,57 @@ env:
 
 jobs:
   # ============================================
-  # LINUX BUILD (Binary + DEB + RPM + Flatpak)
+  # RELEASE SOURCE VALIDATION
   # ============================================
-  build-linux:
+  validate-release-source:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Validate tag points to default branch HEAD
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          git fetch --no-tags origin "$DEFAULT_BRANCH"
+          TAG_SHA="$(git rev-parse HEAD)"
+          BRANCH_SHA="$(git rev-parse "origin/$DEFAULT_BRANCH")"
+          echo "Tag ref: $GITHUB_REF_NAME"
+          echo "Tag SHA: $TAG_SHA"
+          echo "Default branch SHA (origin/$DEFAULT_BRANCH): $BRANCH_SHA"
+          if [ "$TAG_SHA" != "$BRANCH_SHA" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME is not at origin/$DEFAULT_BRANCH HEAD. Push the branch commit and tag together to avoid stale release artifacts."
+            exit 1
+          fi
+
+      - name: Validate app version file matches tag
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          APP_VERSION="$(python3 - <<'PY'
+from app_version import APP_VERSION
+print(APP_VERSION)
+PY
+)"
+          echo "Tag version: $TAG_VERSION"
+          echo "app_version.py: $APP_VERSION"
+          if [ "$APP_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::app_version.py ($APP_VERSION) must match tag version ($TAG_VERSION) before release."
+            exit 1
+          fi
+
+  # ============================================
+  # LINUX BUILD (Binary + DEB + RPM + Flatpak)
+  # ============================================
+  build-linux:
+    needs: validate-release-source
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -117,6 +162,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
 
       - name: Download Linux binary
         uses: actions/download-artifact@v4
@@ -197,9 +245,13 @@ jobs:
   # WINDOWS BUILD (onedir + ZIP to avoid DLL issues)
   # ============================================
   build-windows:
+    needs: validate-release-source
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -287,9 +339,13 @@ jobs:
   # MACOS BUILD (.app + .dmg)
   # ============================================
   build-macos:
+    needs: validate-release-source
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -354,6 +410,9 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -380,6 +439,20 @@ jobs:
           
           # Flatpak (optional)
           cp artifacts/flatpak-build/${{ env.APP_NAME }}.flatpak release/ || true
+
+          APP_VERSION="$(python3 - <<'PY'
+from app_version import APP_VERSION
+print(APP_VERSION)
+PY
+)"
+          GUI_SHA="$(sha256sum bpm_gui.py | awk '{print $1}')"
+          {
+            echo "tag=${GITHUB_REF_NAME}"
+            echo "commit=${GITHUB_SHA}"
+            echo "app_version=${APP_VERSION}"
+            echo "bpm_gui_sha256=${GUI_SHA}"
+            echo "built_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > release/build-info.txt
           
           ls -la release/
 
@@ -400,6 +473,7 @@ jobs:
             ### Highlights
             - Windows: portable ZIP and installer are built from the same ONEDIR payload
             - Release integrity: `checksums.txt` now published with SHA256 hashes for every artifact
+            - Source traceability: `build-info.txt` includes tag, commit SHA, app version, and GUI file checksum
 
             ### Downloads
 
