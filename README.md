@@ -2,7 +2,7 @@
 
 High-precision BPM detection for audio files with a modern desktop GUI and CLI.
 
-![Version](https://img.shields.io/badge/version-1.5.0-blue)
+![Version](https://img.shields.io/badge/version-1.5.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows%20%7C%20macOS-lightgrey)
 
@@ -23,6 +23,7 @@ High-precision BPM detection for audio files with a modern desktop GUI and CLI.
 Download artifacts from [GitHub Releases](../../releases):
 
 - Linux: `BPM-detector-Linux-x64`
+- Linux DEB: `bpm-detector_*_amd64.deb`
 - Windows: `BPM-detector-Windows-x64.zip`
 - Windows Installer: `BPM-detector-Setup-Windows-x64.exe`
 - macOS: `BPM-detector-macOS.dmg`
@@ -35,6 +36,22 @@ Windows note:
 - Start `BPM-detector.exe` directly (no `.cmd` launcher required).
 - Do not move only the `.exe` without the `_internal` directory.
 - Installer mode is available if you prefer Start Menu/Desktop shortcuts.
+
+Debian/Ubuntu note (`.deb` from local download path):
+
+```bash
+DEB=/path/to/bpm-detector_VERSION_amd64.deb
+install -m 0644 "$DEB" /tmp/
+sudo apt install "/tmp/$(basename "$DEB")"
+```
+
+From a repository checkout, you can also run:
+
+```bash
+./scripts/install_deb.sh /path/to/bpm-detector_VERSION_amd64.deb
+```
+
+This avoids the `_apt` warning: `Download is performed unsandboxed as root...`.
 
 ### Option 2: Run from Source
 
@@ -150,6 +167,12 @@ bpm-detector/
 ```
 
 ## Changelog
+
+### v1.5.1
+
+- Improved BPM stability on some M4A/AAC tracks around integer tempos (reduced false `-1 BPM` outputs such as `160 -> 159`)
+- Added Debian install guidance and helper script (`scripts/install_deb.sh`) to avoid `_apt` unsandboxed local-file warning
+- Updated release notes/install snippets for `.deb` staging via `/tmp`
 
 ### v1.5.0
 

@@ -13,6 +13,11 @@ import librosa
 import numpy as np
 import soundfile as sf
 
+# Blend factor used when global ACF tempo and beat-track tempo agree.
+# Keeping a slight preference for the global estimate mitigates beat-interval
+# quantization bias around integer BPM values (e.g. 160 on some M4A/AAC files).
+GLOBAL_BPM_BLEND_WEIGHT = 0.6
+
 
 def build_ffmpeg_cmd(
     ffmpeg_path: str,
@@ -456,9 +461,14 @@ def detect_bpm_details(
         )
         if refined_bpm is not None and np.isfinite(refined_bpm):
             # Hybrid approach: average if they are in the same ballpark
-            # This cancels out biases for tracks that are slightly off
+            # This cancels out biases for tracks that are slightly off.
+            # Give a bit more weight to the global estimate to avoid
+            # systematic -1 BPM drifts from beat-frame quantization.
             if abs(global_bpm - refined_bpm) < 5.0:
-                global_bpm = (global_bpm + refined_bpm) / 2.0
+                global_bpm = (
+                    GLOBAL_BPM_BLEND_WEIGHT * global_bpm
+                    + (1.0 - GLOBAL_BPM_BLEND_WEIGHT) * refined_bpm
+                )
             else:
                 # If they differ too much (harmonic error), trust the beat tracking
                 global_bpm = refined_bpm

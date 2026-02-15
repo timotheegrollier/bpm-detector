@@ -475,7 +475,7 @@ jobs:
             | Platform | Format | File | Instructions |
             |----------|--------|------|--------------|
             | Linux | Binary | `BPM-detector-Linux-x64` | Run `chmod +x` then execute |
-            | Linux | DEB | `bpm-detector_*.deb` | `sudo apt install ./file.deb` |
+            | Linux | DEB | `bpm-detector_*.deb` | Stage in `/tmp` then `sudo apt install /tmp/file.deb` |
             | Linux | RPM | `bpm-detector-*.rpm` | `sudo dnf install ./file.rpm` |
             | Linux | Flatpak | `BPM-detector.flatpak` | `flatpak install ./file.flatpak` |
             | Windows | Installer | `BPM-detector-Setup-Windows-x64.exe` | Run setup, then launch from Start Menu/Desktop shortcut |
@@ -486,7 +486,9 @@ jobs:
 
             **Debian/Ubuntu (apt):**
             ```bash
-            sudo apt install ./bpm-detector_*_amd64.deb
+            cp ./bpm-detector_*_amd64.deb /tmp/
+            sudo chmod 0644 /tmp/bpm-detector_*_amd64.deb
+            sudo apt install /tmp/bpm-detector_*_amd64.deb
             ```
 
             **Fedora/RHEL (dnf):**
