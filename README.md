@@ -168,6 +168,11 @@ bpm-detector/
 
 ## Changelog
 
+### v1.5.2
+
+- Fixed 2/3 harmonic confusion (`107` vs `~160` BPM) on tracks like `Van der Wiese - Soundsystems (Gendefekt Remix)` – added targeted `2/3` lag check (`>0.95` ACF ratio, `<115 BPM` only) without affecting the `31`-file `test`/`tribe` corpus and `Téléchargements/A` reference set
+- Verified zero regression on previously correct BPMs (including `Téléchargements/A` `150/160/163/165/170/180`)
+
 ### v1.5.1
 
 - Improved BPM stability on some M4A/AAC tracks around integer tempos (reduced false `-1 BPM` outputs such as `160 -> 159`)

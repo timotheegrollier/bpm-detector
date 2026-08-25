@@ -162,6 +162,24 @@ def estimate_bpm(
         if ac[local_max_idx] > ac[best_idx] * 0.6:
             best_idx = local_max_idx
 
+    # 2/3 harmonic check: handles 107 vs 160 confusion (e.g. Van der Wiese
+    # - Soundsystems Gendefekt Remix). When the global peak is ~106-114,
+    # a strong peak at 2/3 lag (~159-161) with >0.95 ratio indicates the
+    # faster tempo is the true one. Threshold is intentionally high to
+    # avoid any regression on the existing 31-file corpus (other tracks
+    # have ratio <=0.60 for this harmonic).
+    raw_bpm_before_interp = 60.0 * sr / (hop_length * float(best_idx)) if best_idx > 0 else 0.0
+    if 60.0 <= raw_bpm_before_interp < 115.0:
+        cand_lag = int(round(best_idx * 2.0 / 3.0))
+        if min_lag <= cand_lag <= max_lag:
+            win = 2
+            s = max(min_lag, cand_lag - win)
+            e = min(max_lag, cand_lag + win)
+            local_23_idx = int(np.argmax(ac[s : e + 1]) + s)
+            # Require very strong support to avoid regressions.
+            if ac[local_23_idx] > ac[best_idx] * 0.95:
+                best_idx = local_23_idx
+
     # Parabolic interpolation on ACF for high precision
     if 0 < best_idx < ac.size - 1:
         y0, y1, y2 = ac[best_idx-1:best_idx+2]
