@@ -332,7 +332,9 @@ class BPMApp(tk.Tk):
         self._libs_failed = False
         self._libs_error = ""
         self.selected_files: list[str] = []
-        
+        self._sort_column: Optional[str] = None
+        self._sort_reverse = False
+
         self._init_theme()
         self._build_ui()
         
@@ -634,9 +636,17 @@ class BPMApp(tk.Tk):
         self.tracks_tree = ttk.Treeview(table_frame, 
                                         columns=("name", "bpm", "status"), 
                                         show="headings", selectmode="browse")
-        self.tracks_tree.heading("name", text="NOM")
-        self.tracks_tree.heading("bpm", text="BPM")
-        self.tracks_tree.heading("status", text="STATUT")
+        self._track_column_labels = {
+            "name": "NOM",
+            "bpm": "BPM",
+            "status": "STATUT",
+        }
+        for column, label in self._track_column_labels.items():
+            self.tracks_tree.heading(
+                column,
+                text=label,
+                command=lambda selected_column=column: self._sort_tracks(selected_column),
+            )
         self.tracks_tree.column("name", width=250)
         self.tracks_tree.column("bpm", width=70, anchor="center")
         self.tracks_tree.column("status", width=90, anchor="center")
@@ -809,6 +819,7 @@ class BPMApp(tk.Tk):
         for f in files:
             self.tracks_tree.insert("", "end", iid=f, 
                                    values=(os.path.basename(f), "--", "Prêt"))
+        self._apply_track_sort()
         
         self._active_tasks = len(files)
         options = self._collect_options()
@@ -857,11 +868,52 @@ class BPMApp(tk.Tk):
                                          values=(os.path.basename(path), "ERR", "Échec"))
                     self._log(f"{os.path.basename(path)}: {msg[2]}", error=True)
                     self._update_progress(msg[3])
+                if mtype in ("status", "ok", "err"):
+                    self._apply_track_sort()
                     
         except queue.Empty:
             if self._active_tasks > 0:
                 self.after(100, self._poll_queue)
-    
+
+    def _sort_tracks(self, column: str) -> None:
+        if column == self._sort_column:
+            self._sort_reverse = not self._sort_reverse
+        else:
+            self._sort_column = column
+            self._sort_reverse = False
+
+        for current_column, label in self._track_column_labels.items():
+            indicator = ""
+            if current_column == self._sort_column:
+                indicator = " ▼" if self._sort_reverse else " ▲"
+            self.tracks_tree.heading(current_column, text=label + indicator)
+        self._apply_track_sort()
+
+    def _apply_track_sort(self) -> None:
+        if self._sort_column is None:
+            return
+
+        rows = [
+            (item, self.tracks_tree.set(item, self._sort_column))
+            for item in self.tracks_tree.get_children("")
+        ]
+        if self._sort_column == "bpm":
+            numeric_rows = []
+            other_rows = []
+            for item, value in rows:
+                try:
+                    numeric_rows.append((item, float(value)))
+                except ValueError:
+                    other_rows.append(item)
+            numeric_rows.sort(key=lambda row: row[1], reverse=self._sort_reverse)
+            ordered_items = [item for item, _ in numeric_rows] + other_rows
+        else:
+            rows.sort(key=lambda row: row[1].casefold(), reverse=self._sort_reverse)
+            ordered_items = [item for item, _ in rows]
+
+        for index, item in enumerate(ordered_items):
+            self.tracks_tree.move(item, "", index)
+
     def _update_progress(self, total: int) -> None:
         self._active_tasks -= 1
         self.progress_var.set(((total - self._active_tasks) / total) * 100)
