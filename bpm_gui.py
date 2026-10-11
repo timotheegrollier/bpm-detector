@@ -624,6 +624,9 @@ class BPMApp(tk.Tk):
         top_right.pack(fill="x", padx=20, pady=(20, 10))
         ttk.Label(top_right, text="FILE D'ATTENTE", 
                  font=(self._pick_font_family(), 9, "bold")).pack(side="left")
+        ttk.Button(top_right, text="Vider", command=self._clear_tracks).pack(
+            side="left", padx=(12, 0)
+        )
         
         self.progress_var = tk.DoubleVar(value=0)
         self.progress_bar = ttk.Progressbar(top_right, variable=self.progress_var, 
@@ -855,17 +858,26 @@ class BPMApp(tk.Tk):
                 mtype, path = msg[0], msg[1]
                 
                 if mtype == "status":
-                    self.tracks_tree.item(path, 
-                                         values=(os.path.basename(path), "--", msg[2]))
+                    if self.tracks_tree.exists(path):
+                        self.tracks_tree.item(
+                            path,
+                            values=(os.path.basename(path), "--", msg[2])
+                        )
                 elif mtype == "ok":
                     bpm = f"{msg[2]:.1f}"
-                    self.tracks_tree.item(path, 
-                                         values=(os.path.basename(path), bpm, "Terminé"))
+                    if self.tracks_tree.exists(path):
+                        self.tracks_tree.item(
+                            path,
+                            values=(os.path.basename(path), bpm, "Terminé")
+                        )
                     self.bpm_var.set(bpm)
                     self._update_progress(msg[3])
                 elif mtype == "err":
-                    self.tracks_tree.item(path, 
-                                         values=(os.path.basename(path), "ERR", "Échec"))
+                    if self.tracks_tree.exists(path):
+                        self.tracks_tree.item(
+                            path,
+                            values=(os.path.basename(path), "ERR", "Échec")
+                        )
                     self._log(f"{os.path.basename(path)}: {msg[2]}", error=True)
                     self._update_progress(msg[3])
                 if mtype in ("status", "ok", "err"):
@@ -874,6 +886,9 @@ class BPMApp(tk.Tk):
         except queue.Empty:
             if self._active_tasks > 0:
                 self.after(100, self._poll_queue)
+
+    def _clear_tracks(self) -> None:
+        self.tracks_tree.delete(*self.tracks_tree.get_children())
 
     def _sort_tracks(self, column: str) -> None:
         if column == self._sort_column:

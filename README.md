@@ -2,7 +2,7 @@
 
 High-precision BPM detection for audio files with a modern desktop GUI and CLI.
 
-![Version](https://img.shields.io/badge/version-1.5.3-blue)
+![Version](https://img.shields.io/badge/version-1.5.4-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows%20%7C%20macOS-lightgrey)
 
@@ -12,6 +12,7 @@ High-precision BPM detection for audio files with a modern desktop GUI and CLI.
 - Fast desktop GUI startup
 - Multi-file batch selection from the GUI (`Fichiers...` supports Ctrl/Cmd+click)
 - Sortable track list by name, BPM, and status
+- Quick-clear button for the displayed track list
 - Folder analysis mode for large-library scans
 - CLI mode for automation and scripting
 - Portable binaries with bundled FFmpeg (no system FFmpeg required in release artifacts)
@@ -102,6 +103,7 @@ GUI workflow:
 - `Fichiers...`: pick one or many files (Ctrl/Cmd+click)
 - `Dossier...`: analyze all supported audio files in one folder
 - Click a list header to sort by name, BPM, or status; click again to reverse the order
+- Click `Vider` next to the list to clear its displayed tracks, even during analysis
 - `LANCER L'ANALYSE`: run batch analysis and monitor progress
 
 ### CLI
@@ -169,6 +171,10 @@ bpm-detector/
 ```
 
 ## Changelog
+
+### v1.5.4
+
+- Added a button to quickly clear the displayed track list, including while analysis continues
 
 ### v1.5.3
 
